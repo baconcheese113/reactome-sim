@@ -30,8 +30,6 @@ interface CellularProcess {
   energyCost: number;
   description: string;
   unlocked?: boolean;
-  duration: number; // How long process stays active (in update cycles)
-  timeRemaining: number; // Time left before auto-shutoff
   conflictsWith: string[]; // Processes that cannot run simultaneously
 }
 
@@ -136,7 +134,9 @@ export class CellManagementGame extends Phaser.Scene {
 
   constructor() {
     super({ key: 'CellManagementGame' });
+    console.log('CellManagementGame constructor started');
     this.initializeProcesses();
+    console.log('CellManagementGame constructor completed');
   }
 
   private initializeProcesses(): void {
@@ -150,8 +150,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'atp', amount: 2 }, { molecule: 'pyruvate', amount: 2 }], // Net 2 ATP from glycolysis
         energyCost: 0,
         description: 'Fast ATP production (no oxygen needed, but very inefficient)',
-        duration: 5,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -163,8 +161,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'atp', amount: 28 }, { molecule: 'co2', amount: 6 }, { molecule: 'water', amount: 6 }], // Balanced: total 30 ATP per glucose
         energyCost: 0,
         description: 'Highly efficient ATP production (uses pyruvate from glycolysis + oxygen)',
-        duration: 15,
-        timeRemaining: 0,
         conflictsWith: ['fermentation'] // Can't do both respiration and fermentation simultaneously
       },
       {
@@ -177,8 +173,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 0,
         description: 'Emergency energy pathway (no oxygen needed, but produces waste and no extra ATP)',
         unlocked: true,
-        duration: 10,
-        timeRemaining: 0,
         conflictsWith: ['respiration'] // Can't do both respiration and fermentation simultaneously
       },
       {
@@ -190,8 +184,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'amino_acids', amount: 8 }],
         energyCost: 2,
         description: 'Convert glucose into amino acids for protein synthesis',
-        duration: 8,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -203,8 +195,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'proteins', amount: 1 }],
         energyCost: 3,
         description: 'Build proteins from amino acids (requires amino acid synthesis first)',
-        duration: 12,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -216,8 +206,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'waste', amount: -10 }], // Focus on cellular waste, not CO2
         energyCost: 1, // Reduced from 3 to 1
         description: 'Remove toxic cellular waste (CO2 diffuses out naturally)',
-        duration: 6,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -229,8 +217,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'oxygen', amount: 8 }],
         energyCost: 1, // Reduced from 2 to 1
         description: 'Actively transport oxygen into the cell',
-        duration: 4,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -242,8 +228,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'glucose', amount: 12 }],
         energyCost: 1,
         description: 'Actively transport glucose from bloodstream',
-        duration: 5,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -255,8 +239,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'nucleotides', amount: 8 }],
         energyCost: 1,
         description: 'Import nucleotides from cellular environment',
-        duration: 7,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -268,8 +250,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'dna', amount: 1 }],
         energyCost: 3,
         description: 'Basic DNA synthesis from nucleotides for genetic storage',
-        duration: 15,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -281,8 +261,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'lipids', amount: 4 }],
         energyCost: 2,
         description: 'Convert glucose into lipids for membrane repair',
-        duration: 10,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -294,8 +272,6 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'organelles', amount: 1 }],
         energyCost: 2,
         description: 'Repair cell membrane using lipids, building new organelles',
-        duration: 30,
-        timeRemaining: 0,
         conflictsWith: []
       },
       // ADVANCED METABOLIC PATHWAYS
@@ -309,8 +285,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 3,
         description: 'Convert glucose into fatty acids for energy storage and signaling',
         unlocked: true, // Made available from start
-        duration: 18,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -323,8 +297,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 4,
         description: 'Produce cholesterol for membrane fluidity and hormone precursors',
         unlocked: true, // Made available when fatty acids are available
-        duration: 25,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -337,8 +309,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 3,
         description: 'Synthesize nucleotides for DNA/RNA synthesis',
         unlocked: true, // Basic metabolic process should be available
-        duration: 14,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -351,8 +321,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 2,
         description: 'Transcribe genes into RNA for protein synthesis',
         unlocked: true, // Basic transcription should be available
-        duration: 10,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -365,8 +333,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 8,
         description: 'Replicate DNA in preparation for cell division',
         unlocked: true, // DNA replication should be available
-        duration: 40,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -379,8 +345,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 3,
         description: 'Produce specialized enzymes to boost process efficiency',
         unlocked: true, // Enzyme production should be available
-        duration: 16,
-        timeRemaining: 0,
         conflictsWith: []
       },
       // CELL GROWTH AND DIVISION PATHWAY
@@ -394,8 +358,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 5,
         description: 'Build new organelles to increase cellular capacity',
         unlocked: true, // Essential for cell growth
-        duration: 35,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -408,8 +370,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 15,
         description: 'Divide into two cells - ultimate goal of cellular life!',
         unlocked: false,
-        duration: 30, // Very short duration - must be carefully timed
-        timeRemaining: 0,
         conflictsWith: ['glycolysis', 'respiration'] // Cannot divide while actively metabolizing
       },
       
@@ -424,8 +384,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 4,
         description: 'Produce protective proteins to survive high temperature stress',
         unlocked: false,
-        duration: 20,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -438,8 +396,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 3,
         description: 'Create antioxidants to protect against oxidative stress',
         unlocked: false,
-        duration: 15,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -452,8 +408,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 2,
         description: 'Emergency recycling: break down damaged proteins for survival',
         unlocked: false,
-        duration: 25,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -466,8 +420,6 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 6,
         description: 'Repair accumulated DNA damage to prevent cellular dysfunction',
         unlocked: false,
-        duration: 30,
-        timeRemaining: 0,
         conflictsWith: []
       },
       {
@@ -480,23 +432,16 @@ export class CellManagementGame extends Phaser.Scene {
         energyCost: 8,
         description: 'Comprehensive stress response that improves all process efficiency',
         unlocked: false,
-        duration: 40,
-        timeRemaining: 0,
         conflictsWith: []
       }
     ];
 
     // Add default properties to processes that don't have them
-    this.cellularProcesses.forEach(process => {
-      if (!process.hasOwnProperty('duration')) {
-        process.duration = this.getProcessDuration(process.id);
-        process.timeRemaining = 0;
-        process.conflictsWith = this.getProcessConflicts(process.id);
-      }
-    });
+    // Process initialization complete - no more timer setup needed
   }
 
   create(): void {
+    console.log('CellManagementGame create() started');
     const { width, height } = this.scale;
 
     // Initialize previous molecule stocks for delta calculation
@@ -508,19 +453,31 @@ export class CellManagementGame extends Phaser.Scene {
     // Create a simple white texture for particles
     this.add.graphics().fillStyle(0xffffff).fillCircle(0, 0, 2).generateTexture('white', 4, 4);
     
+    console.log('Starting UI creation');
     this.createUI();
+    console.log('UI created, creating cell visualization');
     this.createCellVisualization();
+    console.log('Cell visualization created, creating process controls');
     this.createProcessControls();
+    console.log('Process controls created, creating info panel');
     this.createProcessInfoPanel();
+    console.log('Info panel created, creating status display');
     this.createStatusDisplay();
+    console.log('Status display created, creating health monitor');
     this.createHealthMonitor();
+    console.log('Health monitor created, creating time controls');
     this.createTimeControls();
+    console.log('Time controls created, initializing objectives');
     this.initializeObjectives();
+    console.log('Objectives initialized, creating purpose display');
     this.createPurposeDisplay();
+    console.log('Purpose display created, starting game loop');
     this.startGameLoop();
+    console.log('Game loop started, showing tutorial');
     
     // Tutorial message
     this.showTutorialMessage();
+    console.log('CellManagementGame create() completed successfully');
   }
 
   private createUI(): void {
@@ -1003,12 +960,12 @@ export class CellManagementGame extends Phaser.Scene {
   private createProcessControls(): void {
     const { width, height } = this.scale;
     
-    // Smaller panel positioned better
+    // Wider panel to accommodate larger buttons
     const panelBg = this.add.graphics();
     panelBg.fillStyle(0x34495e, 0.9);
-    panelBg.fillRoundedRect(width - 380, 70, 360, height - 220, 10); // Fits screen properly
+    panelBg.fillRoundedRect(width - 420, 70, 400, height - 220, 10); // Increased panel width by 40 pixels
     
-    this.add.text(width - 360, 90, 'Cellular Processes:', {
+    this.add.text(width - 400, 80, 'Cellular Processes:', {
       fontSize: '24px',
       color: '#ffffff',
       fontStyle: 'bold'
@@ -1019,7 +976,7 @@ export class CellManagementGame extends Phaser.Scene {
     unlockedProcesses.forEach((process, index) => {
       const col = index % 2;
       const row = Math.floor(index / 2);
-      const x = width - 280 + (col * 160); // Two columns
+      const x = width - 310 + (col * 190); // Adjusted for wider buttons and spacing
       const y = 140 + row * 80; // Tighter spacing
       
       this.createProcessButton(process, x, y);
@@ -1057,7 +1014,7 @@ export class CellManagementGame extends Phaser.Scene {
   private createProcessButton(process: CellularProcess, x: number, y: number): void {
     const container = this.add.container(x, y);
     
-    // Smaller, more compact button
+    // Wider button (increased by 30 pixels)
     const bg = this.add.graphics();
     this.updateProcessButtonVisual(bg, process);
     
@@ -1067,21 +1024,41 @@ export class CellManagementGame extends Phaser.Scene {
       color: '#ffffff',
       fontStyle: 'bold',
       align: 'center',
-      wordWrap: { width: 140 }
+      wordWrap: { width: 170 }
     });
     nameText.setOrigin(0.5);
     
-    // Requirements/Products info - much smaller
-    const infoText = this.add.text(0, 8, this.getProcessInfo(process), {
-      fontSize: '10px', // Much smaller
-      color: '#bdc3c7',
-      align: 'center',
-      wordWrap: { width: 140 }
-    });
-    infoText.setOrigin(0.5);
+    // Get requirements and products separately
+    const processInfo = this.getProcessInfo(process);
     
-    container.add([bg, nameText, infoText]);
-    container.setSize(150, 60); // Much smaller
+    // Needs (left side) - removed "Needs:" label
+    const needsText = this.add.text(-50, 0, processInfo.needs, {
+      fontSize: '11px',
+      color: '#ffcccc',
+      align: 'left',
+      wordWrap: { width: 75 }
+    });
+    needsText.setOrigin(0.5);
+    
+    // Arrow in the center pointing right
+    const arrowText = this.add.text(0, 0, '→', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontStyle: 'bold'
+    });
+    arrowText.setOrigin(0.5);
+    
+    // Produces (right side) - removed "Produces:" label
+    const producesText = this.add.text(50, 0, processInfo.produces, {
+      fontSize: '11px',
+      color: '#ccffcc',
+      align: 'left',
+      wordWrap: { width: 75 }
+    });
+    producesText.setOrigin(0.5);
+    
+    container.add([bg, nameText, needsText, arrowText, producesText]);
+    container.setSize(180, 60); // Increased width by 30 pixels (was 150)
     container.setInteractive();
     
     container.on('pointerdown', () => {
@@ -1112,13 +1089,13 @@ export class CellManagementGame extends Phaser.Scene {
     }
     
     bg.fillStyle(color, 0.8);
-    bg.fillRoundedRect(-75, -30, 150, 60, 8); // Smaller button size
+    bg.fillRoundedRect(-90, -30, 180, 60, 8); // Wider button size (increased by 30 pixels)
     
     if (process.active) {
       // Add pulsing glow effect for active processes
       const pulse = Math.sin(this.time.now * 0.008) * 0.3 + 0.7;
       bg.lineStyle(2, 0x2ecc71, pulse);
-      bg.strokeRoundedRect(-75, -30, 150, 60, 8);
+      bg.strokeRoundedRect(-90, -30, 180, 60, 8);
     }
   }
 
@@ -1132,16 +1109,16 @@ export class CellManagementGame extends Phaser.Scene {
     });
   }
 
-  private getProcessInfo(process: CellularProcess): string {
+  private getProcessInfo(process: CellularProcess): { needs: string; produces: string } {
     const reqText = process.requirements.map(req => 
       `${req.amount} ${req.molecule}`
-    ).join(', ');
+    ).join('\n');
     
     const prodText = process.products.map(prod => 
       `${prod.amount} ${prod.molecule}`
-    ).join(', ');
+    ).join('\n');
     
-    return `Needs: ${reqText}\nProduces: ${prodText}`;
+    return { needs: reqText, produces: prodText };
   }
 
   private updateProcessInfo(process: CellularProcess | null): void {
@@ -1209,7 +1186,7 @@ export class CellManagementGame extends Phaser.Scene {
     // Time control panel moved 200px more to the right and 10px down
     const panelBg = this.add.graphics();
     panelBg.fillStyle(0x34495e, 0.95);
-    panelBg.fillRoundedRect(width / 2 + 250, 20, 300, 50, 10); // Moved down 10px: was 10, now 20
+    panelBg.fillRoundedRect(width / 2 + 240, 20, 320, 60, 10); // Moved down 10px: was 10, now 20
     
     // Title
     const titleText = this.add.text(width / 2 + 260, 30, 'Time Control:', { // Moved down 10px: was 20, now 30
@@ -1219,14 +1196,14 @@ export class CellManagementGame extends Phaser.Scene {
     });
     
     // Speed display
-    this.speedDisplay = this.add.text(width / 2 + 340, 30, 'Speed: 1.0x', { // Moved down 10px: was 20, now 30
+    this.speedDisplay = this.add.text(width / 2 + 380, 30, 'Speed: 1.0x', { // Moved down 10px: was 20, now 30
       fontSize: '12px',
       color: '#3498db',
       fontStyle: 'bold'
     });
     
     // Control buttons - horizontal layout
-    const buttonY = 45; // Moved down 10px: was 35, now 45
+    const buttonY = 55; // Moved down 10px: was 35, now 45
     const buttonSpacing = 35;
     const startX = width / 2 + 320;
     
@@ -1263,7 +1240,7 @@ export class CellManagementGame extends Phaser.Scene {
     this.input.keyboard?.on('keydown-FOUR', () => this.setGameSpeed(5.0));
     
     // Help text - moved to align with new time controls position
-    this.add.text(width / 2 + 400, 70, 'Keys: SPACE=Pause, 1=Normal, 2=Fast, 3=Slow, 4=Very Fast', {
+    this.add.text(width / 2 + 400, 70, 'SPACE=Pause, 1=Normal, 2=Fast, 3=Slow, 4=Very Fast', {
       fontSize: '10px',
       color: '#95a5a6',
       fontStyle: 'italic'
@@ -1560,7 +1537,6 @@ export class CellManagementGame extends Phaser.Scene {
       targets: notification,
       alpha: 1,
       x: notificationX,
-      duration: 300,
       ease: 'Power2'
     });
     
@@ -1579,7 +1555,6 @@ export class CellManagementGame extends Phaser.Scene {
       targets: notification,
       alpha: 0,
       x: notification.x - 30,
-      duration: 200,
       ease: 'Power2',
       onComplete: () => {
         notification.destroy();
@@ -1592,7 +1567,6 @@ export class CellManagementGame extends Phaser.Scene {
           this.tweens.add({
             targets: notif,
             y: newY,
-            duration: 200,
             ease: 'Power2'
           });
         });
@@ -1608,7 +1582,6 @@ export class CellManagementGame extends Phaser.Scene {
   private toggleProcess(process: CellularProcess): void {
     if (process.active) {
       process.active = false;
-      process.timeRemaining = 0;
       this.showAlert(`${process.name} deactivated`, 'info');
     } else {
       // Check for conflicts before activation
@@ -1626,8 +1599,7 @@ export class CellManagementGame extends Phaser.Scene {
 
       if (this.canRunProcess(process)) {
         process.active = true;
-        process.timeRemaining = process.duration;
-        this.showAlert(`${process.name} activated (${process.duration}s duration)`, 'info');
+        this.showAlert(`${process.name} activated`, 'info');
       } else {
         this.showAlert(`Cannot activate ${process.name} - insufficient resources!`, 'warning');
       }
@@ -1721,7 +1693,6 @@ export class CellManagementGame extends Phaser.Scene {
           this.tweens.add({
             targets: indicator,
             alpha: 0.2,
-            duration: 1000,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
@@ -1795,28 +1766,11 @@ export class CellManagementGame extends Phaser.Scene {
     // Process active cellular processes
     this.cellularProcesses.forEach(process => {
       if (process.active && this.canRunProcess(process)) {
-        // Countdown timer - processes auto-shutoff
-        process.timeRemaining -= 1;
-        
-        // Warning when process is about to shut off
-        if (process.timeRemaining === 10) {
-          this.showAlert(`${process.name} shutting off in 10 seconds!`, 'warning');
-        }
-        
-        // Auto-shutoff when timer expires
-        if (process.timeRemaining <= 0) {
-          process.active = false;
-          process.timeRemaining = 0;
-          this.showAlert(`${process.name} auto-shutoff! Reactivate to continue.`, 'warning');
-          return; // Don't run the process this cycle
-        }
-
         // Run the process
         this.runProcess(process);
       } else if (process.active && !this.canRunProcess(process)) {
         // Process cannot continue due to lack of resources
         process.active = false;
-        process.timeRemaining = 0;
         this.showAlert(`${process.name} stopped - insufficient resources!`, 'warning');
       }
     });
@@ -1981,45 +1935,6 @@ export class CellManagementGame extends Phaser.Scene {
         this.showAlert('Energy Overload! Too many ATP-demanding processes active!', 'danger');
       }
     }
-  }
-
-  private getProcessDuration(processId: string): number {
-    // Different processes have different durations before auto-shutoff
-    const durations: Record<string, number> = {
-      'glycolysis': 90, // Fast energy, short duration
-      'respiration': 150, // Efficient but needs monitoring
-      'amino_acid_synthesis': 100,
-      'protein_synthesis': 80, // Complex, requires frequent reactivation
-      'waste_removal': 60, // Must be run frequently
-      'oxygen_transport': 120,
-      'glucose_uptake': 130,
-      'nucleotide_uptake': 120,
-      'dna_synthesis': 90,
-      'lipid_synthesis': 70, // Resource intensive
-      'membrane_repair': 50, // Critical maintenance
-      'fatty_acid_synthesis': 85,
-      'nucleotide_synthesis': 75,
-      'rna_synthesis': 65,
-      'dna_replication': 40,
-      'cell_division': 30
-    };
-    return durations[processId] || 100;
-  }
-
-  private getProcessConflicts(processId: string): string[] {
-    // Define which processes cannot run simultaneously
-    const conflicts: Record<string, string[]> = {
-      'respiration': ['fermentation'], // Aerobic respiration conflicts with anaerobic fermentation
-      'fermentation': ['respiration'], // Anaerobic fermentation conflicts with aerobic respiration
-      'protein_synthesis': ['lipid_synthesis'], // Compete for resources
-      'lipid_synthesis': ['protein_synthesis'],
-      'membrane_repair': ['waste_removal'], // Both are maintenance operations
-      'waste_removal': ['membrane_repair'],
-      'dna_replication': ['rna_synthesis'], // Cannot replicate and transcribe simultaneously
-      'rna_synthesis': ['dna_replication'],
-      'cell_division': ['glycolysis', 'respiration', 'protein_synthesis'] // Division requires full cellular focus
-    };
-    return conflicts[processId] || [];
   }
 
   private initializeObjectives(): void {
@@ -2214,7 +2129,7 @@ export class CellManagementGame extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5).setData('isSpecChoice', true);
     
-    this.add.text(width / 2 - 200, height / 2 - 40, 'Generate powerful\ncontractions to\nmove the organism', {
+    this.add.text(width / 2 - 200, height / 2 - 20, 'Generate powerful\ncontractions to\nmove the organism', {
       fontSize: '12px',
       color: '#ecf0f1',
       align: 'center'
@@ -2234,7 +2149,7 @@ export class CellManagementGame extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5).setData('isSpecChoice', true);
     
-    this.add.text(width / 2, height / 2 - 40, 'Transmit signals\nto coordinate\nthe organism', {
+    this.add.text(width / 2, height / 2 - 20, 'Transmit signals\nto coordinate\nthe organism', {
       fontSize: '12px',
       color: '#ecf0f1',
       align: 'center'
@@ -2254,7 +2169,7 @@ export class CellManagementGame extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5).setData('isSpecChoice', true);
     
-    this.add.text(width / 2 + 200, height / 2 - 40, 'Defend against\nthreats and\nmaintain health', {
+    this.add.text(width / 2 + 200, height / 2 - 20, 'Defend against\nthreats and\nmaintain health', {
       fontSize: '12px',
       color: '#ecf0f1',
       align: 'center'
@@ -3125,7 +3040,7 @@ export class CellManagementGame extends Phaser.Scene {
     molecularStatus += `Glucose: ${Math.round(this.moleculeStocks.glucose || 0)} (fuel source)\n`;
     molecularStatus += `Oxygen: ${Math.round(this.moleculeStocks.oxygen || 0)} (needed for respiration)`;
     
-    this.add.text(width / 2, height / 2 + 40, molecularStatus, {
+    this.add.text(width / 2, height / 2 + 50, molecularStatus, {
       fontSize: '14px',
       color: '#e67e22',
       align: 'center',
@@ -3182,61 +3097,9 @@ export class CellManagementGame extends Phaser.Scene {
   }
 
   private restartGame(): void {
-    // Reset all game state to initial values
-    this.moleculeStocks = {
-      glucose: 20,
-      oxygen: 25,
-      water: 50,
-      atp: 10,
-      pyruvate: 0,
-      amino_acids: 0,
-      proteins: 0,
-      lipids: 0,
-      fatty_acids: 0,
-      nucleotides: 0,
-      rna: 0,
-      dna: 0,
-      co2: 5,
-      waste: 0,
-      enzymes: 0,
-      organelles: 0
-    };
-    
-    this.previousMoleculeStocks = {};
-    
-    // Reset all cellular processes to inactive
-    this.cellularProcesses.forEach(process => {
-      process.active = false;
-      process.efficiency = 1.0;
-      process.timeRemaining = 0;
-    });
-    
-    // Reset game state variables
-    this.energyLevel = 50;
-    this.difficulty = 1;
-    this.cellSize = 1;
-    this.reproductionProgress = 0;
-    this.day = 1;
-    this.timeOfDay = 0;
-    this.gameSpeed = 1.0;
-    this.isPaused = false;
-    
-    // Reset goals
-    this.goals = [];
-    this.activeEvents = [];
-    this.healthFactors = [];
-    
-    // Clear any existing timers or tweens
-    this.time.removeAllEvents();
-    this.tweens.killAll();
-    
-    // Clear all notifications
-    this.notifications.forEach(notification => notification.destroy());
-    this.notifications = [];
-    this.recentNotifications.clear();
-    
-    // Restart the scene to rebuild UI with fresh state
-    this.scene.restart();
+    // For the most reliable restart, reload the entire page
+    // This ensures all state is completely cleared and reinitialized
+    window.location.reload();
   }
 
   private gameWin(): void {
@@ -3411,11 +3274,11 @@ export class CellManagementGame extends Phaser.Scene {
     const energyBar = this.add.graphics();
     energyBar.fillStyle(0x3498db);
     const energyWidth = Math.max(0, (Math.max(0, this.energyLevel) / 100) * 300); // Much larger bar: 300px wide
-    energyBar.fillRect(40, height - 180, energyWidth, 45); // Much thicker: 45px high, repositioned to replace health
+    energyBar.fillRect(40, height - 170, energyWidth, 45); // Much thicker: 45px high, repositioned to replace health
     energyBar.lineStyle(4, 0xffffff); // Thicker border
-    energyBar.strokeRect(40, height - 180, 300, 45);
+    energyBar.strokeRect(40, height - 170, 300, 45);
     
-    const energyText = this.add.text(40, height - 210, `Energy: ${Math.floor(Math.max(0, this.energyLevel))}%`, {
+    const energyText = this.add.text(40, height - 190, `Energy: ${Math.floor(Math.max(0, this.energyLevel))}%`, {
       fontSize: '18px', // Reduced from 24px for better readability
       color: '#ffffff',
       fontStyle: 'bold'
@@ -3428,11 +3291,11 @@ export class CellManagementGame extends Phaser.Scene {
     
     const wasteBar = this.add.graphics();
     wasteBar.fillStyle(wastePercentage > 66 ? 0xff0000 : wastePercentage > 33 ? 0xff8c00 : 0x4caf50);
-    wasteBar.fillRect(40, height - 120, (wastePercentage / 100) * 300, 45);
+    wasteBar.fillRect(40, height - 100, (wastePercentage / 100) * 300, 45);
     wasteBar.lineStyle(4, 0xffffff);
-    wasteBar.strokeRect(40, height - 120, 300, 45);
+    wasteBar.strokeRect(40, height - 100, 300, 45);
     
-    const wasteText = this.add.text(40, height - 150, `Waste: ${Math.floor(wasteLevel)}/${wasteCapacity} (${Math.floor(wastePercentage)}%)`, {
+    const wasteText = this.add.text(40, height - 120, `Waste: ${Math.floor(wasteLevel)}/${wasteCapacity} (${Math.floor(wastePercentage)}%)`, {
       fontSize: '16px', // Reduced from 20px for better readability
       color: '#ffffff',
       fontStyle: 'bold'
