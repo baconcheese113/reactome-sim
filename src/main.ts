@@ -1,6 +1,13 @@
 import Phaser from 'phaser';
 import { CellManagementGame } from './scenes/CellManagementGame';
 
+// Export for debugging - properly typed window extension
+declare global {
+  interface Window {
+    game: Phaser.Game;
+  }
+}
+
 // Game configuration optimized for Reactome Sim
 const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -40,15 +47,19 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
 };
 
 // Initialize the game
-const game = new Phaser.Game(gameConfig);
+try {
+  console.log('Initializing Phaser game...');
+  const game = new Phaser.Game(gameConfig);
+  console.log('Phaser game initialized successfully');
 
-// Export for debugging - properly typed window extension
-declare global {
-  interface Window {
-    game: Phaser.Game;
+  window.game = game;
+} catch (error) {
+  console.error('Failed to initialize game:', error);
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) {
+    loadingScreen.innerHTML = `
+      <h1>🧬 Reactome Sim</h1>
+      <p style="color: #ff6666;">Error loading game: ${error}</p>
+    `;
   }
 }
-
-window.game = game;
-
-export default game;
