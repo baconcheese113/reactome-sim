@@ -45,8 +45,8 @@ export class Molecule extends Phaser.GameObjects.Container {
   public properties: MoleculeProperties;
   public isMoving: boolean = false;
   public velocity: Phaser.Math.Vector2;
-  private moleculeSprite: Phaser.GameObjects.Graphics;
-  private labelText: Phaser.GameObjects.Text;
+  private moleculeSprite!: Phaser.GameObjects.Graphics;
+  private labelText!: Phaser.GameObjects.Text;
 
   constructor(
     scene: Phaser.Scene,
@@ -130,6 +130,12 @@ export class Molecule extends Phaser.GameObjects.Container {
   }
 
   public highlight(color: number = 0x00ff00): void {
+    // Temporarily change color for highlight effect
+    const originalColor = this.properties.color;
+    this.moleculeSprite.clear();
+    this.moleculeSprite.fillStyle(color);
+    this.moleculeSprite.fillCircle(0, 0, this.properties.size);
+    
     this.scene.tweens.add({
       targets: this.moleculeSprite,
       scaleX: 1.2,
@@ -137,6 +143,12 @@ export class Molecule extends Phaser.GameObjects.Container {
       duration: 300,
       yoyo: true,
       repeat: 2,
+      onComplete: () => {
+        // Restore original color
+        this.moleculeSprite.clear();
+        this.moleculeSprite.fillStyle(originalColor);
+        this.moleculeSprite.fillCircle(0, 0, this.properties.size);
+      }
     });
   }
 

@@ -1,593 +1,215 @@
-# Reactome Sim - Enhanced Molecular Pathway Game
+# Reactome Simulator - Cellular Management Game
 
-An educational molecular biology game that transforms the Reactome database into an interactive learning experience. Build biochemical pathways, validate reaction sequences, and understand cellular metabolism through engaging gameplay.
+A realistic cellular biology simulation game where you manage the complex molecular processes of a living cell. Guide your cell through metabolic pathways, energy production, waste management, and ultimately achieve cellular reproduction - all while facing the challenges that real cells encounter every day.
 
 ## 🧬 Game Features
 
-### Core Gameplay
-- **Interactive Pathway Building**: Drag and drop enzymes to construct metabolic pathways
-- **Real-Time Validation**: Advanced biochemical validation system checks enzyme sequences and thermodynamics
-- **Visual Particle Effects**: Enhanced particle systems visualize molecular reactions and energy flow
-- **Educational Content**: Learn glycolysis, cellular respiration, and metabolic processes
+### Core Cellular Processes
+- **Energy Production**: Glycolysis, cellular respiration, and fermentation pathways
+- **Biosynthesis**: Protein, lipid, nucleotide, and organelle production
+- **Transport Systems**: Glucose uptake, oxygen transport, and waste removal
+- **Cell Growth**: DNA replication, enzyme production, and organelle biogenesis
+- **Cell Division**: The ultimate goal - successfully reproduce your cell
 
-### Enhanced Systems
+### Advanced Cellular Systems (Unlocked after Day 2)
+- **Stress Response**: Heat shock proteins and antioxidant production
+- **DNA Repair**: Fix accumulated genetic damage
+- **Autophagy**: Emergency recycling of cellular components
+- **Stress Adaptation**: Comprehensive cellular protection systems
 
-#### Biochemical Validation System
-- **Enzyme Sequence Validation**: Ensures enzymes are placed in biochemically correct order
-- **Thermodynamic Analysis**: Calculates energy changes (ΔG) for reaction feasibility
-- **Substrate/Product Tracking**: Validates molecular availability for each reaction step
-- **Cofactor Requirements**: Checks for essential cofactors (Mg²⁺, NAD+, etc.)
-- **Efficiency Scoring**: Grades pathway construction with A+ to D ratings
+### Realistic Biology
+- **16+ Molecule Types**: From basic glucose and ATP to complex proteins and enzymes
+- **Molecular Death Conditions**: Die when waste ≥200 or CO₂ ≥120, just like real cells
+- **Metabolic Flexibility**: Switch between aerobic and anaerobic pathways based on conditions
+- **Resource Management**: Each molecule has realistic capacities and consumption rates
+- **Process Dependencies**: Complex biochemical pathways with realistic requirements
 
-#### Enhanced Particle Effects
-- **Energy Release Visualization**: Shows ATP/ADP energy changes
-- **Molecular Bond Formation**: Animated bonds between reacting molecules
-- **Enzyme Activity Indicators**: Particle effects show enzyme catalysis
-- **Pathway Flow Animation**: Flowing particles demonstrate metabolic flux
-- **Reaction Type Effects**: Different visuals for synthesis, breakdown, and transfer reactions
+## 🎮 How to Play
 
-#### Real-Time Feedback
-- **Pathway Efficiency Display**: Live percentage of pathway optimization
-- **Validation Error Messages**: Clear explanations of biochemical issues
-- **Completion Grades**: Performance ratings based on accuracy and efficiency
+### Getting Started
+1. **Survive**: Keep your cell alive by managing energy (ATP) and waste products
+2. **Balance Resources**: Monitor glucose, oxygen, and other critical molecules
+3. **Run Processes**: Click cellular process buttons to activate metabolic pathways
+4. **Optimize Efficiency**: Build enzymes and organelles to improve process performance
+5. **Grow and Divide**: Accumulate enough resources to achieve cell division
 
-## 🎮 Gameplay Mechanics
+### Key Strategies
+- **Energy Management**: Run glycolysis for quick ATP, respiration for efficient ATP
+- **Waste Control**: Use waste removal and ensure CO₂ doesn't accumulate
+- **Growth Phase**: Build proteins and organelles to increase cellular capacity
+- **Division Timing**: Carefully time cell division when you have sufficient resources
 
-### Level 1: Basic Glycolysis
-- **Objective**: Convert glucose to pyruvate using correct enzyme sequence
-- **Available Enzymes**: Hexokinase, Phosphoglucose Isomerase, Phosphofructokinase
-- **Learning Focus**: Understanding enzyme specificity and reaction order
+### Time Controls
+- **Pause**: Space bar or ⏸ button
+- **Speed Control**: 1-5x speed options for different gameplay paces
+- **Keyboard Shortcuts**: 1=Normal, 2=Fast, 3=Slow, 4=Very Fast
 
-### Scoring System
-- Base score: 100 points per completed level
-- Efficiency bonus: Multiplied by pathway efficiency percentage
-- Energy management: Maintain ATP levels for continued gameplay
+## 📊 Molecular Systems
 
-### Controls
-- **Drag & Drop**: Move enzymes from panel to pathway area
-- **Visual Feedback**: Real-time validation display and particle effects
-- **Menu Navigation**: Return to main menu or restart levels
+### Essential Molecules
+- **Glucose**: Primary energy source (critical < 5, target 10+)
+- **Oxygen**: Required for efficient respiration (critical < 3, target 8+)  
+- **ATP**: Cellular energy currency (critical < 5, target 15+)
+- **Water**: Essential for all cellular processes
+- **Waste**: Must be kept below 200 to avoid death
 
-## 🔬 Educational Value
+### Intermediate Molecules
+- **Pyruvate**: Bridge between glycolysis and respiration
+- **Amino Acids**: Building blocks for protein synthesis
+- **Nucleotides**: Required for DNA/RNA synthesis
+- **Lipids**: Membrane components and energy storage
 
-### Biochemistry Concepts
-- **Enzyme Kinetics**: Understanding catalytic mechanisms
-- **Metabolic Regulation**: Learning pathway control points
-- **Energy Metabolism**: ATP/ADP cycling and energy conservation
-- **Substrate Specificity**: Enzyme-substrate relationships
+### Advanced Molecules (Late Game)
+- **Heat Shock Proteins**: Protection against temperature stress
+- **Antioxidants**: Defense against oxidative damage
+- **Damaged Proteins**: Accumulated cellular damage requiring cleanup
+- **DNA Damage**: Genetic damage that needs repair
 
-### Real-World Applications
-- **Metabolic Disorders**: Understanding pathway disruptions
-- **Drug Development**: Targeting specific enzymes
-- **Biotechnology**: Engineering metabolic pathways
-- **Medical Diagnosis**: Interpreting metabolic markers
+## 🔬 Biological Accuracy
 
-## 🛠 Technical Implementation
+### Real Cellular Processes
+- **Glycolysis**: Converts 1 glucose → 2 ATP + 2 pyruvate (anaerobic)
+- **Cellular Respiration**: 2 pyruvate + 6 oxygen → 28 ATP + 6 CO₂ + 6 water
+- **Fermentation**: Emergency anaerobic pathway producing waste
+- **Protein Synthesis**: Amino acids + ATP + RNA → Proteins
+- **DNA Replication**: High-energy process requiring nucleotides and ATP
+
+### Death Conditions
+Based on real cellular biology:
+- **Waste Toxicity**: Death when waste ≥ 200 (cellular poisoning)
+- **CO₂ Poisoning**: Death when CO₂ ≥ 120 (respiratory acidosis)
+- **Energy Depletion**: Death when ATP < 0 (cellular energy crisis)
+
+### Metabolic Pathways
+- **Aerobic Respiration**: Highly efficient but requires oxygen
+- **Anaerobic Fermentation**: Less efficient but oxygen-independent
+- **Metabolic Switching**: Cells automatically adapt to available resources
+
+## 🛠️ Technical Details
+
+### Built With
+- **Phaser 3.90.0**: Modern HTML5 game framework
+- **TypeScript 5.9.2**: Type-safe development
+- **Vite**: Fast development and build tools
+- **Modern Web Standards**: Runs in any modern browser
 
 ### Architecture
-- **Phaser 3**: Game engine for interactive visuals
-- **TypeScript**: Type-safe development with biochemical interfaces
-- **Modular Design**: Separate systems for validation, particles, and entities
+- **Component-Based**: Modular cellular process system
+- **Real-Time Simulation**: Continuous molecular updates
+- **Responsive UI**: Adaptive interface for different screen sizes
+- **Type Safety**: Full TypeScript implementation prevents runtime errors
 
-### Key Classes
-- `biochemical_validator`: Advanced pathway validation system
-- `enhanced_particle_system`: Sophisticated visual effects
-- `bio_molecule`: Realistic molecular entity representation
-- `GameplayScene`: Main game logic and user interaction
-
-### Code Quality
-- **No 'any' Types**: Strict TypeScript typing for all systems
-- **Kebab-Case Naming**: Consistent file naming convention
-- **Modular Architecture**: Separaton of concerns across systems
-
-## 🚀 Getting Started
+## 🚀 Installation & Setup
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn package manager
+- Node.js 18+ and npm
+- Modern web browser (Chrome, Firefox, Safari, Edge)
 
-### Installation
+### Quick Start
 ```bash
-git clone [repository-url]
+# Clone the repository
+git clone https://github.com/your-username/reactome-sim.git
 cd reactome-sim
-npm install
-```
 
-### Development
-```bash
-npm run dev
-# Game available at http://localhost:3000
-```
-
-### Building for Production
-```bash
-npm run build
-npm run preview
-```
-
-## 🎯 Future Enhancements
-
-### Planned Features
-- **Additional Pathways**: Citric acid cycle, electron transport chain
-- **Multiplayer Mode**: Collaborative pathway construction
-- **Research Integration**: Real Reactome database connectivity
-- **Advanced Simulations**: Enzyme kinetics and inhibition
-- **VR/AR Support**: Immersive molecular visualization
-
-### Educational Extensions
-- **Curriculum Integration**: Alignment with biochemistry courses
-- **Assessment Tools**: Automated grading and progress tracking
-- **Teacher Dashboard**: Student performance analytics
-- **Interactive Tutorials**: Step-by-step guided learning
-
-## 📊 Performance Metrics
-
-### Validation System
-- **Real-time Analysis**: Sub-100ms pathway validation
-- **Accuracy Checking**: 13 validation rules for glycolysis
-- **Error Reporting**: Specific biochemical issue identification
-
-### Visual Effects
-- **Particle Optimization**: Efficient GPU-accelerated rendering
-- **Animation Smoothness**: 60 FPS particle effects
-- **Memory Management**: Automatic cleanup of expired effects
-
-## 🧪 Scientific Accuracy
-
-### Biochemical Fidelity
-- **Enzyme Properties**: Based on actual biochemical data
-- **Reaction Energetics**: Real ΔG values from literature
-- **Pathway Sequences**: Authentic metabolic order
-- **Molecular Structures**: Simplified but scientifically accurate
-
-### Educational Standards
-- **Peer Review**: Validated by biochemistry educators
-- **Curriculum Alignment**: Matches university-level content
-- **Accuracy Verification**: Cross-referenced with textbooks
-
-## 📝 Contributing
-
-### Development Guidelines
-- Follow TypeScript strict mode
-- Use kebab-case for file names
-- Maintain 100% type safety
-- Document all biochemical assumptions
-
-### Testing
-- Unit tests for validation logic
-- Integration tests for game systems
-- Educational content verification
-
----
-
-**Reactome Sim** - Making molecular biology accessible through interactive gameplay.
-
-*Built with 🧬 for biochemistry education and research.*
-- **Responsive UI**: Clean, modern interface optimized for both desktop and mobile
-- **Color Coding**: Different molecule types have distinct, vibrant colors
-
-### Technical Graphics Features
-- **Smooth Animations**: Phaser's tween system for enzyme movements
-- **Particle Systems**: Molecular flow visualization, reaction explosions
-- **Dynamic Lighting**: Pathway activation creates light trails
-- **Responsive Layout**: Adapts to different screen sizes automatically
-
----
-
-## 🛠 Technical Architecture
-
-### Frontend (Phaser 3 + TypeScript)
-```
-src/
-├── scenes/                 # Phaser game scenes
-│   ├── MenuScene.ts
-│   ├── GameplayScene.ts
-│   ├── MultiplayerScene.ts
-│   └── TutorialScene.ts
-├── entities/               # Game objects
-│   ├── Molecule.ts
-│   ├── Enzyme.ts
-│   ├── Pathway.ts
-│   └── Particle.ts
-├── systems/                # Game logic systems
-│   ├── PathwayEngine.ts
-│   ├── ReactionValidator.ts
-│   ├── ScoreCalculator.ts
-│   └── MultiplayerManager.ts
-├── ui/                     # UI components
-│   ├── HUD.ts
-│   ├── InventoryPanel.ts
-│   └── PathwayBuilder.ts
-├── network/                # Networking (already exists)
-│   ├── net-bus.ts
-│   ├── net-entity.ts
-│   └── transport.ts
-├── data/                   # Game data management
-│   ├── ReactomeAPI.ts
-│   ├── PathwayDatabase.ts
-│   └── LevelData.ts
-└── utils/                  # Utilities
-    ├── BiologyUtils.ts
-    ├── AnimationHelpers.ts
-    └── SceneTransitions.ts
-```
-
-### Backend Services
-```
-server/
-├── api/                    # REST API endpoints
-│   ├── reactome-proxy.ts   # Reactome API integration
-│   ├── pathways.ts         # Pathway data management
-│   ├── leaderboards.ts     # Scoring system
-│   └── user-progress.ts    # Player progression
-├── realtime/               # WebSocket services
-│   ├── multiplayer.ts      # Real-time multiplayer
-│   ├── chat.ts             # In-game communication
-│   └── events.ts           # Live events system
-├── database/               # Data persistence
-│   ├── models/             # Data models
-│   └── migrations/         # Database setup
-└── external/               # External integrations
-    ├── reactome-client.ts  # Reactome API client
-    └── research-feeds.ts   # Scientific paper feeds
-```
-
----
-
-## 🚀 Development Phases
-
-### Phase 1: Core Prototype (Weeks 1-4)
-**Goal**: Playable pathway puzzle game with basic mechanics
-
-#### Week 1: Project Setup
-- [ ] Initialize Phaser 3 + TypeScript project
-- [ ] Set up development environment (Vite, ESLint, Prettier)
-- [ ] Create basic project structure
-- [ ] Implement simple molecule and pathway classes
-- [ ] Basic scene management (Menu → Game → Results)
-
-#### Week 2: Core Gameplay
-- [ ] Pathway building mechanics (drag & drop)
-- [ ] Molecule flow simulation
-- [ ] Basic enzyme system
-- [ ] Simple scoring algorithm
-- [ ] Level completion detection
-
-#### Week 3: Visual Polish
-- [ ] Particle effects for molecular flow
-- [ ] Enzyme activation animations
-- [ ] UI/UX improvements
-- [ ] Sound effects integration
-- [ ] Mobile touch controls
-
-#### Week 4: Content & Testing
-- [ ] Create 10 tutorial levels (glycolysis basics)
-- [ ] Implement difficulty progression
-- [ ] Add pause/resume functionality
-- [ ] Performance optimization
-- [ ] User testing and feedback integration
-
-### Phase 2: Enhanced Gameplay (Weeks 5-8)
-**Goal**: Multiple game modes and improved content
-
-#### Week 5: Molecular Tetris Mode
-- [ ] Falling molecule mechanics
-- [ ] Real-time pathway formation
-- [ ] Chain reaction system
-- [ ] Power-up implementation
-- [ ] High score tracking
-
-#### Week 6: Cell Defense Mode
-- [ ] Tower defense basic framework
-- [ ] Pathogen AI behavior
-- [ ] Defense pathway placement
-- [ ] Resource management system
-- [ ] Wave-based progression
-
-#### Week 7: Content Expansion
-- [ ] 20 additional levels across different pathways
-- [ ] Boss battle mechanics
-- [ ] Achievement system
-- [ ] Daily challenges
-- [ ] Player progression tracking
-
-#### Week 8: Reactome Integration
-- [ ] Reactome API client implementation
-- [ ] Real pathway data integration
-- [ ] Dynamic level generation from pathway data
-- [ ] Educational content linking
-- [ ] Pathway discovery system
-
-### Phase 3: Multiplayer & Social (Weeks 9-12)
-**Goal**: Online multiplayer and community features
-
-#### Week 9: Backend Infrastructure
-- [ ] Node.js/Express server setup
-- [ ] WebSocket implementation for real-time play
-- [ ] User authentication system
-- [ ] Database setup (PostgreSQL/MongoDB)
-- [ ] Leaderboard system
-
-#### Week 10: Multiplayer Modes
-- [ ] Real-time racing mode
-- [ ] Cooperative cell management
-- [ ] PvP pathogen vs immune system
-- [ ] Lobby system and matchmaking
-- [ ] Spectator mode
-
-#### Week 11: Social Features
-- [ ] Friend system
-- [ ] Guild/team functionality
-- [ ] Shared pathway creations
-- [ ] Community challenges
-- [ ] Research paper integration
-
-#### Week 12: Polish & Launch Prep
-- [ ] Performance optimization for multiplayer
-- [ ] Comprehensive testing
-- [ ] Analytics integration
-- [ ] Deployment pipeline setup
-- [ ] Beta testing program
-
-### Phase 4: Advanced Features (Weeks 13-16)
-**Goal**: Advanced gameplay and educational integration
-
-#### Week 13: Advanced Game Modes
-- [ ] Pathway editor/creator mode
-- [ ] Custom challenge sharing
-- [ ] Tournament system
-- [ ] Seasonal events
-- [ ] Research collaboration mode
-
-#### Week 14: Educational Integration
-- [ ] Interactive pathway encyclopedia
-- [ ] Scientific paper links
-- [ ] Researcher interview videos
-- [ ] Virtual lab experiments
-- [ ] Academic progress tracking
-
-#### Week 15: Mobile Optimization
-- [ ] Progressive Web App (PWA) setup
-- [ ] Mobile-specific UI adjustments
-- [ ] Offline gameplay support
-- [ ] Push notification system
-- [ ] App store preparation
-
-#### Week 16: Analytics & Expansion
-- [ ] Player behavior analytics
-- [ ] A/B testing framework
-- [ ] Content recommendation system
-- [ ] Expansion planning based on data
-- [ ] Community feedback integration
-
----
-
-## 🔧 Technical Implementation Details
-
-### Phaser 3 Setup
-```typescript
-// Game configuration optimized for Reactome Sim
-const gameConfig: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 1920,
-  height: 1080,
-  scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.CENTER_BOTH
-  },
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 0 }, // No gravity for molecular simulation
-      debug: false
-    }
-  },
-  scene: [MenuScene, GameplayScene, MultiplayerScene],
-  backgroundColor: '#0a0a0a'
-};
-```
-
-### Pathway System Architecture
-```typescript
-interface PathwayNode {
-  id: string;
-  type: 'molecule' | 'enzyme' | 'complex';
-  position: { x: number; y: number };
-  connections: string[];
-  properties: MoleculeProperties | EnzymeProperties;
-}
-
-interface Pathway {
-  id: string;
-  name: string;
-  nodes: PathwayNode[];
-  reactions: Reaction[];
-  energyRequirement: number;
-  difficulty: number;
-}
-
-class PathwayEngine {
-  validatePathway(pathway: Pathway): boolean;
-  simulateFlow(pathway: Pathway): FlowResult;
-  calculateScore(pathway: Pathway, time: number): number;
-}
-```
-
-### Multiplayer Integration
-```typescript
-class MultiplayerManager {
-  private socket: Socket;
-  
-  joinRoom(roomId: string): Promise<void>;
-  sendPathwayUpdate(pathway: Pathway): void;
-  onPlayerAction(callback: (action: PlayerAction) => void): void;
-  syncGameState(gameState: GameState): void;
-}
-```
-
-### Reactome API Integration
-```typescript
-class ReactomeAPI {
-  async getPathway(pathwayId: string): Promise<PathwayData>;
-  async searchPathways(query: string): Promise<PathwaySearchResult[]>;
-  async getReactions(pathwayId: string): Promise<Reaction[]>;
-  async getMoleculeInfo(moleculeId: string): Promise<MoleculeInfo>;
-}
-```
-
----
-
-## 🎯 Key Features for Maximum Fun
-
-### 1. **Immediate Visual Feedback**
-- Particle trails show molecular flow in real-time
-- Enzyme activations create satisfying visual effects
-- Successful pathways produce cascading light shows
-- Failed attempts have clear visual indicators
-
-### 2. **Progressive Difficulty**
-- Start with simple 3-step pathways
-- Gradually introduce complexity (branching, regulation, feedback loops)
-- Boss levels feature major biological processes (cell division, immune response)
-- Expert levels use real Reactome pathway data
-
-### 3. **Competitive Elements**
-- Global leaderboards for each pathway
-- Weekly challenges based on current research
-- Speedrun modes for pathway optimization
-- Community tournaments with real prizes
-
-### 4. **Discovery & Learning** (Enhanced for Deep Understanding)
-- **Concept Scaffolding**: Each level introduces one new biological principle
-- **Reflection Checkpoints**: Game pauses to ask "Why do you think this pathway exists?"
-- **Real Research Integration**: Show how current scientists study these same pathways
-- **Misconception Addressing**: Common biology errors become puzzle challenges
-- **Cross-Pathway Connections**: Demonstrate how cellular systems interconnect
-- **Clinical Relevance**: Link each pathway to actual diseases and treatments
-
----
-
-## 🌐 Internet-Connected Features
-
-### Real-time Data
-- **Live Research Integration**: New pathways from latest Reactome releases
-- **Community Challenges**: Weekly puzzles based on current scientific discoveries
-- **Global Events**: Special challenges during major scientific announcements
-
-### Social Learning
-- **Pathway Sharing**: Players can create and share custom pathway puzzles
-- **Research Collaboration**: Connect with real researchers studying specific pathways
-- **Educational Partnerships**: Integration with universities and research institutions
-
-### Dynamic Content
-- **Adaptive Difficulty**: AI adjusts challenge based on player performance
-- **Personalized Learning**: Recommends pathways based on interests and progress
-- **Live Leaderboards**: Real-time competition across different challenge types
-
----
-
-## 📱 Platform Strategy
-
-### Primary: Web (Phaser 3)
-- Instant access through browser
-- Cross-platform compatibility
-- Easy updates and content delivery
-- Built-in sharing capabilities
-
-### Secondary: Progressive Web App
-- Offline gameplay support
-- Mobile app-like experience
-- Push notifications for challenges
-- App store presence without native development
-
-### Future: Mobile Native
-- Enhanced touch controls
-- Platform-specific optimizations
-- In-app purchases for advanced content
-- Deeper mobile platform integration
-
----
-
-## 🎓 Educational Impact Goals & Learning Mechanisms
-
-### Ensuring Real Biology Learning
-
-#### **Concept Reinforcement System**
-- **Reflection Moments**: Pause gameplay to explain WHY pathways work this way
-- **Principle Testing**: Quiz players on underlying concepts, not just mechanics
-- **Real-World Connections**: Show how pathway disruptions cause actual diseases
-- **Misconception Correction**: Address common biology misunderstandings through gameplay
-
-#### **Scientific Accuracy Measures**
-- **Validated Pathway Data**: All game mechanics based on peer-reviewed Reactome data
-- **Expert Review**: Biochemistry professors validate educational content
-- **Complexity Scaling**: Start simple but progressively introduce real biological complexity
-- **Context Provision**: Explain evolutionary and physiological significance of each pathway
-
-#### **Active Learning Integration**
-- **Hypothesis Formation**: Players predict pathway outcomes before testing
-- **Experimental Design**: Create scenarios where players design experiments
-- **Data Interpretation**: Present real experimental data for players to analyze
-- **Peer Teaching**: Multiplayer modes where players explain concepts to each other
-
-### For Students
-- **Conceptual Understanding**: Move beyond memorization to genuine comprehension
-- **Scientific Thinking**: Develop hypothesis-testing and experimental design skills
-- **Career Connection**: Meet real researchers and understand current challenges
-- **Assessment Integration**: Gameplay data provides meaningful learning analytics
-
-### For Researchers
-- **Public Engagement**: Make complex research accessible to broader audiences
-- **Pathway Exploration**: Interactive tools for visualizing and testing pathway hypotheses
-- **Education Research**: Study how gamification affects learning retention
-- **Collaborative Discovery**: Crowdsource pathway analysis through gameplay
-
-### For Educators
-- **Evidence-Based Curriculum**: Teaching materials backed by learning science research
-- **Differentiated Instruction**: Adaptive difficulty based on student understanding
-- **Formative Assessment**: Real-time feedback on student comprehension
-- **Cross-Curricular Integration**: Connect biology to chemistry, physics, and mathematics
-
-### Learning Validation Methods
-- **Pre/Post Assessments**: Measure actual knowledge gains, not just engagement
-- **Transfer Testing**: Can players apply concepts to novel situations?
-- **Long-term Retention**: Follow-up testing weeks/months after gameplay
-- **Expert Evaluation**: Biochemistry educators assess learning outcomes
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+
-- TypeScript 5+
-- Modern browser with WebGL support
-- Git for version control
-
-### Development Setup
-```bash
-# Clone and setup
-git clone [repository-url]
-cd reactome-sim
+# Install dependencies
 npm install
 
 # Start development server
 npm run dev
 
-# Run tests
-npm test
-
 # Build for production
 npm run build
 ```
 
-### First Sprint Goals
-1. Basic molecule rendering and movement
-2. Simple pathway connection mechanics
-3. One complete tutorial level
-4. Mobile-responsive controls
-5. Basic particle effects
+### Development Server
+```bash
+npm run dev
+# Open http://localhost:5173 in your browser
+```
+
+### Project Structure
+```
+reactome-sim/
+├── src/
+│   ├── scenes/
+│   │   └── CellManagementGame.ts    # Main game logic
+│   ├── types/
+│   │   └── game-types.ts            # TypeScript interfaces
+│   └── main.ts                      # Application entry point
+├── public/                          # Static assets
+├── package.json                     # Dependencies and scripts
+└── README.md                        # This file
+```
+
+## 🎯 Game Goals & Achievements
+
+### Short-Term Goals
+- Survive your first day
+- Successfully run all basic metabolic processes
+- Build your first organelle
+- Accumulate 100+ ATP
+
+### Medium-Term Goals  
+- Survive 3 days
+- Unlock advanced cellular systems
+- Successfully handle stress events
+- Build a complete enzyme complement
+
+### Ultimate Goal
+- **Cell Division**: Successfully accumulate enough resources and organize cellular machinery to divide into two viable cells
+
+### Victory Condition
+Successfully survive 7 days OR achieve cell division - proving your mastery of cellular biology!
+
+## 🧪 Educational Value
+
+### Learn Real Biology
+- **Metabolic Pathways**: Understand how cells generate energy
+- **Biosynthesis**: Learn how cells build complex molecules
+- **Cellular Stress**: Discover how cells respond to environmental challenges
+- **Cell Division**: Experience the complexity of cellular reproduction
+
+### Biochemistry Concepts
+- **ATP Energy Currency**: Why cells need constant energy
+- **Enzyme Function**: How biological catalysts accelerate reactions
+- **Membrane Transport**: How molecules move in and out of cells
+- **Metabolic Regulation**: How cells balance competing processes
+
+## 🤝 Contributing
+
+We welcome contributions to improve the biological accuracy, add new cellular processes, or enhance the gameplay experience!
+
+### Development Guidelines
+- Follow existing TypeScript/code style
+- Ensure biological accuracy in new processes
+- Add appropriate error handling
+- Include descriptive comments for complex biology
+
+### Suggested Improvements
+- Additional stress response pathways
+- Cell cycle checkpoints and regulation
+- Organelle-specific processes (mitochondrial, ER, Golgi)
+- Cell signaling and communication systems
+- Circadian rhythm effects on cellular processes
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Real Cell Biology**: Inspired by decades of cellular biology research
+- **Educational Goal**: Making complex biochemistry accessible through interactive gameplay
+- **Open Source**: Built with amazing open-source tools and libraries
+
+## 🐛 Bug Reports & Feature Requests
+
+Please report issues or suggest features through GitHub Issues. Include:
+- Clear description of the issue/feature
+- Steps to reproduce (for bugs)
+- Biological rationale (for new features)
+- Screenshots if applicable
 
 ---
 
-This plan balances immediate fun with educational depth, leverages Phaser's strengths for visual gameplay, and creates a sustainable development roadmap for turning Reactome's rich scientific data into an engaging game experience.
+**Ready to master cellular life? Start your simulation and see if you can successfully grow and divide a virtual cell using real biochemical processes!**

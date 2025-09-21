@@ -55,6 +55,9 @@ declare global {
  * - Implements: generic state replication via two multicast methods (_send/_apply)
  */
 export abstract class NetComponent {
+  /** Required property for NetBusInstance interface */
+  __netKey: string;
+
   /** Bus for RPC/multicast. Always defined, even in of SP/offline. */
   protected _netBus: NetBus;
 
@@ -68,6 +71,7 @@ export abstract class NetComponent {
     this._netBus = netBus;
     this._isHost = !!netBus.isHost;
     this.netAddress = opts?.address ?? autoAddress(this.constructor.name);
+    this.__netKey = this.netAddress; // Set the required __netKey property
 
     // Let the bus register any decorated methods on this instance using the netAddress as key.
     this._netBus.registerInstance(this, this.netAddress);

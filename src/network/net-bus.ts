@@ -108,30 +108,6 @@ export class NetBus {
   // Internal helpers
   // ----------------
 
-interface RpcMessage {
-  t: 'rpc';
-  key: string;
-  method: string;
-  args: unknown[];
-}
-
-interface MulticastMessage {
-  t: 'multicast';
-  key: string;
-  method: string;
-  args: unknown[];
-}
-
-interface PatchMessage {
-  t: 'patch';
-  key: string;
-  chan: string;
-  rev: number;
-  data: unknown;
-}
-
-type NetworkMessage = RpcMessage | MulticastMessage | PatchMessage;
-
   private handleEnvelope(_from: PeerId, data: unknown): void {
     // Handle RPC and patch message format
     if (typeof data === 'object' && data && 't' in data) {
@@ -167,7 +143,6 @@ type NetworkMessage = RpcMessage | MulticastMessage | PatchMessage;
         const handler = this.handlers.get(targetKey);
         if (handler) handler(msg.args);
         return;
-      }
       }
     }
   }

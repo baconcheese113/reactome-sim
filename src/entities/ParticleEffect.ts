@@ -110,7 +110,7 @@ export class ParticleEffect extends Phaser.GameObjects.Particles.ParticleEmitter
     }
 
     const emitter = new ParticleEffect(scene, x, y, 'particle', {
-      speed: { min: 10, max: 30 },
+      speed: { min: 10, max: Math.min(30, radius * 0.6) }, // Use radius to influence speed
       scale: { start: 0.1, end: 0.3 },
       alpha: { start: 0.8, end: 0 },
       lifespan: 2000,
@@ -119,7 +119,7 @@ export class ParticleEffect extends Phaser.GameObjects.Particles.ParticleEmitter
       frequency: 50,
       angle: { min: 0, max: 360 },
       radial: true,
-      blendMode: 'ADD',
+      blendMode: 'ADD'
     });
 
     return emitter;

@@ -3,6 +3,19 @@
 
 export type PeerId = string;
 
+interface SignalingMessage {
+  type: string;
+  roomCode?: string;
+  peerId?: string;
+  offer?: RTCSessionDescriptionInit;
+  answer?: RTCSessionDescriptionInit;
+  candidate?: RTCIceCandidateInit;
+  from?: string;
+  to?: string;
+  sdp?: RTCSessionDescriptionInit;
+  error?: string;
+}
+
 export interface NetworkTransport {
   /** True if this peer is the authoritative host. */
   readonly isHost: boolean;
@@ -148,17 +161,6 @@ export class WebRTCTransport implements NetworkTransport {
     };
   }
   
-interface SignalingMessage {
-  type: string;
-  roomCode?: string;
-  peerId?: string;
-  offer?: RTCSessionDescriptionInit;
-  answer?: RTCSessionDescriptionInit;
-  candidate?: RTCIceCandidateInit;
-  from?: string;
-  to?: string;
-}
-
   private async handleSignalingMessage(message: SignalingMessage, roomId: string): Promise<void> {
     switch (message.type) {
       case "room-not-found":
@@ -195,12 +197,16 @@ interface SignalingMessage {
       case "offer":
         this.localId = "client-01";
         console.log(`📨 Received offer for ${this.localId}`);
-        await this.handleOffer(message.sdp, roomId);
+        if (message.sdp) {
+          await this.handleOffer(message.sdp, roomId);
+        }
         break;
         
       case "answer":
         console.log("📬 Received answer");
-        await this.handleAnswer(message.sdp);
+        if (message.sdp) {
+          await this.handleAnswer(message.sdp);
+        }
         break;
         
       case "ice-candidate":

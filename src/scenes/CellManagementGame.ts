@@ -52,20 +52,6 @@ interface CellularObjective {
   progress: number;
 }
 
-interface ResearchPath {
-  id: string;
-  name: string;
-  description: string;
-  vision: string; // The ultimate goal this leads to
-  stages: {
-    name: string;
-    requirements: { molecule: string; amount: number }[];
-    benefit: string;
-    completed: boolean;
-  }[];
-  currentStage: number;
-}
-
 export class CellManagementGame extends Phaser.Scene {
   private moleculeStocks: MoleculeStock = {
     glucose: 20,
@@ -74,7 +60,12 @@ export class CellManagementGame extends Phaser.Scene {
     atp: 10,
     pyruvate: 0, // Added for glycolysis-respiration pathway
     co2: 5,
-    waste: 0
+    waste: 0,
+    // Advanced molecules start at 0, unlocked later
+    heat_shock_proteins: 0,
+    antioxidants: 0,
+    damaged_proteins: 0,
+    dna_damage: 0
   };
   
   private previousMoleculeStocks: MoleculeStock = {};
@@ -94,12 +85,16 @@ export class CellManagementGame extends Phaser.Scene {
     co2: 150,
     waste: 300,
     enzymes: 60,
-    organelles: 30
+    organelles: 30,
+    // Advanced molecules for late-game systems
+    heat_shock_proteins: 50,
+    antioxidants: 40,
+    damaged_proteins: 100,
+    dna_damage: 20
   };
   
   private cellularProcesses: CellularProcess[] = [];
   private currentObjectives: CellularObjective[] = [];
-  private researchPaths: ResearchPath[] = [];
   private cellPurpose: string = 'Undifferentiated'; // What is this cell trying to become?
   private activeEvents: any[] = [];
   private cellVisuals!: CellVisuals;
@@ -110,14 +105,11 @@ export class CellManagementGame extends Phaser.Scene {
   private cellSize: number = 1; // New: cell growth metric
   private reproductionProgress: number = 0; // New: progress toward cell division
   private goals: { name: string; description: string; target: number; current: number; completed: boolean }[] = [];
-  private achievements: string[] = [];
   private efficiency: number = 1.0;
   private day: number = 1;
   private timeOfDay: number = 0; // 0-24 hours
   
   // Game mechanics
-  private autoProcessTimer: number = 0;
-  private eventTimer: number = 0;
   
   // UI Elements
   private stockDisplays: Map<string, Phaser.GameObjects.Text> = new Map();
@@ -125,8 +117,6 @@ export class CellManagementGame extends Phaser.Scene {
   private processButtons: Map<string, Phaser.GameObjects.Container> = new Map();
   private alertPanel!: Phaser.GameObjects.Container;
   private statusPanel!: Phaser.GameObjects.Container;
-  private eventPanel!: Phaser.GameObjects.Container;
-  private processInfoPanel!: Phaser.GameObjects.Container;
   private processInfoText!: Phaser.GameObjects.Text;
   private healthFactors: Array<{factor: string, impact: number, description: string}> = [];
   private healthMonitor!: Phaser.GameObjects.Container;
@@ -136,7 +126,6 @@ export class CellManagementGame extends Phaser.Scene {
   private lastUIUpdate: number = 0;
   
   // Visual effects
-  private particles: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
   private cellCenter = { x: 400, y: 400 };
 
   // Time control system
@@ -160,7 +149,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'glucose', amount: 1 }],
         products: [{ molecule: 'atp', amount: 2 }, { molecule: 'pyruvate', amount: 2 }], // Net 2 ATP from glycolysis
         energyCost: 0,
-        description: 'Fast ATP production (no oxygen needed, but very inefficient)'
+        description: 'Fast ATP production (no oxygen needed, but very inefficient)',
+        duration: 5,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'respiration',
@@ -197,7 +189,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'glucose', amount: 2 }, { molecule: 'atp', amount: 4 }],
         products: [{ molecule: 'amino_acids', amount: 8 }],
         energyCost: 2,
-        description: 'Convert glucose into amino acids for protein synthesis'
+        description: 'Convert glucose into amino acids for protein synthesis',
+        duration: 8,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'protein_synthesis',
@@ -207,7 +202,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'atp', amount: 10 }, { molecule: 'amino_acids', amount: 5 }],
         products: [{ molecule: 'proteins', amount: 1 }],
         energyCost: 3,
-        description: 'Build proteins from amino acids (requires amino acid synthesis first)'
+        description: 'Build proteins from amino acids (requires amino acid synthesis first)',
+        duration: 12,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'waste_removal',
@@ -217,7 +215,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'atp', amount: 2 }],
         products: [{ molecule: 'waste', amount: -10 }], // Focus on cellular waste, not CO2
         energyCost: 1, // Reduced from 3 to 1
-        description: 'Remove toxic cellular waste (CO2 diffuses out naturally)'
+        description: 'Remove toxic cellular waste (CO2 diffuses out naturally)',
+        duration: 6,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'oxygen_transport',
@@ -227,7 +228,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'atp', amount: 2 }],
         products: [{ molecule: 'oxygen', amount: 8 }],
         energyCost: 1, // Reduced from 2 to 1
-        description: 'Actively transport oxygen into the cell'
+        description: 'Actively transport oxygen into the cell',
+        duration: 4,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'glucose_uptake',
@@ -237,7 +241,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'atp', amount: 3 }],
         products: [{ molecule: 'glucose', amount: 12 }],
         energyCost: 1,
-        description: 'Actively transport glucose from bloodstream'
+        description: 'Actively transport glucose from bloodstream',
+        duration: 5,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'nucleotide_uptake',
@@ -247,7 +254,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'atp', amount: 4 }],
         products: [{ molecule: 'nucleotides', amount: 8 }],
         energyCost: 1,
-        description: 'Import nucleotides from cellular environment'
+        description: 'Import nucleotides from cellular environment',
+        duration: 7,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'dna_synthesis',
@@ -257,7 +267,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'nucleotides', amount: 6 }, { molecule: 'atp', amount: 12 }],
         products: [{ molecule: 'dna', amount: 1 }],
         energyCost: 3,
-        description: 'Basic DNA synthesis from nucleotides for genetic storage'
+        description: 'Basic DNA synthesis from nucleotides for genetic storage',
+        duration: 15,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'lipid_synthesis',
@@ -267,7 +280,10 @@ export class CellManagementGame extends Phaser.Scene {
         requirements: [{ molecule: 'glucose', amount: 3 }, { molecule: 'atp', amount: 6 }],
         products: [{ molecule: 'lipids', amount: 4 }],
         energyCost: 2,
-        description: 'Convert glucose into lipids for membrane repair'
+        description: 'Convert glucose into lipids for membrane repair',
+        duration: 10,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'membrane_repair',
@@ -292,7 +308,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'fatty_acids', amount: 6 }],
         energyCost: 3,
         description: 'Convert glucose into fatty acids for energy storage and signaling',
-        unlocked: true // Made available from start
+        unlocked: true, // Made available from start
+        duration: 18,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'cholesterol_synthesis',
@@ -303,7 +322,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'cholesterol', amount: 2 }],
         energyCost: 4,
         description: 'Produce cholesterol for membrane fluidity and hormone precursors',
-        unlocked: true // Made available when fatty acids are available
+        unlocked: true, // Made available when fatty acids are available
+        duration: 25,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'nucleotide_synthesis',
@@ -314,7 +336,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'nucleotides', amount: 6 }],
         energyCost: 3,
         description: 'Synthesize nucleotides for DNA/RNA synthesis',
-        unlocked: true // Basic metabolic process should be available
+        unlocked: true, // Basic metabolic process should be available
+        duration: 14,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'rna_synthesis',
@@ -325,7 +350,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'rna', amount: 3 }],
         energyCost: 2,
         description: 'Transcribe genes into RNA for protein synthesis',
-        unlocked: true // Basic transcription should be available
+        unlocked: true, // Basic transcription should be available
+        duration: 10,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'dna_replication',
@@ -336,7 +364,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'dna', amount: 1 }],
         energyCost: 8,
         description: 'Replicate DNA in preparation for cell division',
-        unlocked: true // DNA replication should be available
+        unlocked: true, // DNA replication should be available
+        duration: 40,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'enzyme_production',
@@ -347,7 +378,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'enzymes', amount: 4 }],
         energyCost: 3,
         description: 'Produce specialized enzymes to boost process efficiency',
-        unlocked: true // Enzyme production should be available
+        unlocked: true, // Enzyme production should be available
+        duration: 16,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       // CELL GROWTH AND DIVISION PATHWAY
       {
@@ -359,7 +393,10 @@ export class CellManagementGame extends Phaser.Scene {
         products: [{ molecule: 'organelles', amount: 1 }],
         energyCost: 5,
         description: 'Build new organelles to increase cellular capacity',
-        unlocked: true // Essential for cell growth
+        unlocked: true, // Essential for cell growth
+        duration: 35,
+        timeRemaining: 0,
+        conflictsWith: []
       },
       {
         id: 'cell_division',
@@ -374,6 +411,78 @@ export class CellManagementGame extends Phaser.Scene {
         duration: 30, // Very short duration - must be carefully timed
         timeRemaining: 0,
         conflictsWith: ['glycolysis', 'respiration'] // Cannot divide while actively metabolizing
+      },
+      
+      // ADVANCED CELLULAR SYSTEMS (unlocked after day 2)
+      {
+        id: 'heat_shock_response',
+        name: 'Heat Shock Response',
+        active: false,
+        efficiency: 1.0,
+        requirements: [{ molecule: 'atp', amount: 15 }, { molecule: 'proteins', amount: 2 }],
+        products: [{ molecule: 'heat_shock_proteins', amount: 5 }],
+        energyCost: 4,
+        description: 'Produce protective proteins to survive high temperature stress',
+        unlocked: false,
+        duration: 20,
+        timeRemaining: 0,
+        conflictsWith: []
+      },
+      {
+        id: 'antioxidant_production',
+        name: 'Antioxidant Production',
+        active: false,
+        efficiency: 1.0,
+        requirements: [{ molecule: 'atp', amount: 12 }, { molecule: 'amino_acids', amount: 3 }],
+        products: [{ molecule: 'antioxidants', amount: 8 }],
+        energyCost: 3,
+        description: 'Create antioxidants to protect against oxidative stress',
+        unlocked: false,
+        duration: 15,
+        timeRemaining: 0,
+        conflictsWith: []
+      },
+      {
+        id: 'autophagy',
+        name: 'Autophagy',
+        active: false,
+        efficiency: 1.0,
+        requirements: [{ molecule: 'atp', amount: 5 }],
+        products: [{ molecule: 'amino_acids', amount: 4 }, { molecule: 'damaged_proteins', amount: -3 }],
+        energyCost: 2,
+        description: 'Emergency recycling: break down damaged proteins for survival',
+        unlocked: false,
+        duration: 25,
+        timeRemaining: 0,
+        conflictsWith: []
+      },
+      {
+        id: 'dna_repair',
+        name: 'DNA Repair',
+        active: false,
+        efficiency: 1.0,
+        requirements: [{ molecule: 'atp', amount: 20 }, { molecule: 'nucleotides', amount: 2 }],
+        products: [{ molecule: 'dna_damage', amount: -5 }],
+        energyCost: 6,
+        description: 'Repair accumulated DNA damage to prevent cellular dysfunction',
+        unlocked: false,
+        duration: 30,
+        timeRemaining: 0,
+        conflictsWith: []
+      },
+      {
+        id: 'stress_adaptation',
+        name: 'Stress Adaptation',
+        active: false,
+        efficiency: 1.0,
+        requirements: [{ molecule: 'atp', amount: 25 }, { molecule: 'heat_shock_proteins', amount: 2 }, { molecule: 'antioxidants', amount: 3 }],
+        products: [{ molecule: 'enzymes', amount: 3 }],
+        energyCost: 8,
+        description: 'Comprehensive stress response that improves all process efficiency',
+        unlocked: false,
+        duration: 40,
+        timeRemaining: 0,
+        conflictsWith: []
       }
     ];
 
@@ -407,7 +516,6 @@ export class CellManagementGame extends Phaser.Scene {
     this.createHealthMonitor();
     this.createTimeControls();
     this.initializeObjectives();
-    this.initializeResearchPaths();
     this.createPurposeDisplay();
     this.startGameLoop();
     
@@ -416,7 +524,7 @@ export class CellManagementGame extends Phaser.Scene {
   }
 
   private createUI(): void {
-    const { width, height } = this.scale;
+    const { width } = this.scale;
 
     // Title
     this.add.text(width / 2, 30, 'Cell Management Game', {
@@ -534,7 +642,7 @@ export class CellManagementGame extends Phaser.Scene {
     // Add ribosomes on rough ER
     erPoints.forEach(([x, y], i) => {
       if (i % 2 === 0) {
-        const ribosome = this.add.circle(x + 3, y + 3, 2, 0x2ecc71, 0.8);
+        this.add.circle(x + 3, y + 3, 2, 0x2ecc71, 0.8);
       }
     });
     
@@ -942,7 +1050,8 @@ export class CellManagementGame extends Phaser.Scene {
       wordWrap: { width: 380 }
     });
     
-    this.processInfoPanel = this.add.container(0, 0, [panelBg, this.processInfoText]);
+    // Create panel but don't store reference since it's not used elsewhere
+    this.add.container(0, 0, [panelBg, this.processInfoText]);
   }
 
   private createProcessButton(process: CellularProcess, x: number, y: number): void {
@@ -1154,7 +1263,7 @@ export class CellManagementGame extends Phaser.Scene {
     this.input.keyboard?.on('keydown-FOUR', () => this.setGameSpeed(5.0));
     
     // Help text - moved to align with new time controls position
-    const helpText = this.add.text(width / 2 + 400, 70, 'Keys: SPACE=Pause, 1=Normal, 2=Fast, 3=Slow, 4=Very Fast', {
+    this.add.text(width / 2 + 400, 70, 'Keys: SPACE=Pause, 1=Normal, 2=Fast, 3=Slow, 4=Very Fast', {
       fontSize: '10px',
       color: '#95a5a6',
       fontStyle: 'italic'
@@ -1286,7 +1395,7 @@ export class CellManagementGame extends Phaser.Scene {
     
     // Show one active goal at the very bottom
     const activeGoals = this.goals.filter(g => !g.completed).slice(0, 1);
-    activeGoals.forEach((goal, index) => {
+    activeGoals.forEach((goal) => {
       const goalY = height - 35;
       const progress = Math.min(100, (goal.current / goal.target) * 100);
       
@@ -1604,7 +1713,7 @@ export class CellManagementGame extends Phaser.Scene {
     pathways.dna_synthesis.setVisible(this.isProcessActive('dna_synthesis'));
     
     // Add pulsing animation to active pathways
-    Object.entries(pathways).forEach(([processId, indicator]) => {
+    Object.entries(pathways).forEach(([, indicator]) => {
       if (indicator.visible) {
         // Create pulsing effect
         if (!indicator.getData('isPulsing')) {
@@ -1948,67 +2057,8 @@ export class CellManagementGame extends Phaser.Scene {
     ];
   }
 
-  private initializeResearchPaths(): void {
-    this.researchPaths = [
-      {
-        id: 'muscle_research',
-        name: 'Muscle Cell Development',
-        description: 'Develop into a powerful muscle cell capable of contraction',
-        vision: 'Become the driving force behind movement - generate powerful contractions to move the organism',
-        stages: [
-          {
-            name: 'Actin Foundation',
-            requirements: [{ molecule: 'proteins', amount: 15 }],
-            benefit: 'Unlocks basic contractile proteins',
-            completed: false
-          },
-          {
-            name: 'Myosin Machinery',
-            requirements: [{ molecule: 'proteins', amount: 30 }, { molecule: 'atp', amount: 200 }],
-            benefit: 'Enables powerful muscle contractions',
-            completed: false
-          },
-          {
-            name: 'Calcium Control',
-            requirements: [{ molecule: 'organelles', amount: 10 }],
-            benefit: 'Precise contraction control - you can now move the organism!',
-            completed: false
-          }
-        ],
-        currentStage: 0
-      },
-      {
-        id: 'nerve_research',
-        name: 'Nerve Cell Development',
-        description: 'Develop into a nerve cell capable of rapid communication',
-        vision: 'Become the communication network - transmit signals that coordinate the entire organism',
-        stages: [
-          {
-            name: 'Membrane Specialization',
-            requirements: [{ molecule: 'lipids', amount: 25 }],
-            benefit: 'Creates specialized ion channels',
-            completed: false
-          },
-          {
-            name: 'Axon Extension',
-            requirements: [{ molecule: 'proteins', amount: 40 }],
-            benefit: 'Grows long projections for signal transmission',
-            completed: false
-          },
-          {
-            name: 'Synaptic Networks',
-            requirements: [{ molecule: 'organelles', amount: 15 }],
-            benefit: 'Connect with other cells - you can now control the organism!',
-            completed: false
-          }
-        ],
-        currentStage: 0
-      }
-    ];
-  }
-
   private createPurposeDisplay(): void {
-    const { width, height } = this.scale;
+    const { width } = this.scale;
     
     // Purpose banner at the top
     const purposeBg = this.add.graphics();
@@ -2319,7 +2369,9 @@ export class CellManagementGame extends Phaser.Scene {
         this.cellVisuals.cytoplasm.fillCircle(this.cellCenter.x, this.cellCenter.y, 78);
         
         // Add more mitochondria for muscle
-        const extraMito = this.add.ellipse(this.cellCenter.x + 10, this.cellCenter.y - 25, 16, 8, 0xe74c3c, 0.9);
+        const extraMito = this.add.graphics();
+        extraMito.fillStyle(0xe74c3c, 0.9);
+        extraMito.fillEllipse(this.cellCenter.x + 10, this.cellCenter.y - 25, 16, 8);
         this.cellVisuals.mitochondria.push(extraMito);
         break;
         
@@ -2330,8 +2382,8 @@ export class CellManagementGame extends Phaser.Scene {
         this.cellVisuals.cytoplasm.fillCircle(this.cellCenter.x, this.cellCenter.y, 78);
         
         // Elongated shape suggestions with extensions
-        const extension1 = this.add.ellipse(this.cellCenter.x - 70, this.cellCenter.y + 60, 8, 30, 0x3498db, 0.6);
-        const extension2 = this.add.ellipse(this.cellCenter.x + 75, this.cellCenter.y - 45, 8, 25, 0x3498db, 0.6);
+        this.add.ellipse(this.cellCenter.x - 70, this.cellCenter.y + 60, 8, 30, 0x3498db, 0.6);
+        this.add.ellipse(this.cellCenter.x + 75, this.cellCenter.y - 45, 8, 25, 0x3498db, 0.6);
         break;
         
       case 'immune':
@@ -2341,9 +2393,9 @@ export class CellManagementGame extends Phaser.Scene {
         this.cellVisuals.cytoplasm.fillCircle(this.cellCenter.x, this.cellCenter.y, 78);
         
         // Add receptor-like structures
-        const receptor1 = this.add.circle(this.cellCenter.x - 65, this.cellCenter.y - 20, 4, 0x27ae60, 0.8);
-        const receptor2 = this.add.circle(this.cellCenter.x + 70, this.cellCenter.y + 15, 4, 0x27ae60, 0.8);
-        const receptor3 = this.add.circle(this.cellCenter.x + 20, this.cellCenter.y - 70, 4, 0x27ae60, 0.8);
+        this.add.circle(this.cellCenter.x - 65, this.cellCenter.y - 20, 4, 0x27ae60, 0.8);
+        this.add.circle(this.cellCenter.x + 70, this.cellCenter.y + 15, 4, 0x27ae60, 0.8);
+        this.add.circle(this.cellCenter.x + 20, this.cellCenter.y - 70, 4, 0x27ae60, 0.8);
         break;
     }
   }
@@ -2621,175 +2673,6 @@ export class CellManagementGame extends Phaser.Scene {
     // Energy regeneration based on ATP levels (slightly reduced efficiency)
     const energyFromATP = Math.min(4, this.moleculeStocks.atp * 0.15); // Reduced from 5 and 0.2
     this.energyLevel = Math.min(100, this.energyLevel + energyFromATP);
-  }
-
-  private updateCellHealth(): void {
-    this.healthFactors = []; // Reset health factors for this update
-    let healthChange = 0;
-    
-    // Health is based on ACTUAL molecular conditions, not arbitrary process requirements
-    
-    // CRITICAL: Energy depletion - cell dies without energy
-    if (this.energyLevel <= 5) {
-      const impact = -8;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'ENERGY DEPLETION',
-        impact: impact,
-        description: 'FATAL: Cell has no energy left!'
-      });
-      
-      // Critical warning log
-      if (this.energyLevel <= 1) {
-        console.warn('🚨 CRITICAL: Energy at fatal levels!', {
-          energy: this.energyLevel,
-          health: this.cellHealth,
-          activeProcesses: this.cellularProcesses.filter(p => p.active).map(p => p.name)
-        });
-      }
-    }
-    
-    // CRITICAL: Resource starvation - based on actual molecular needs
-    if (this.moleculeStocks.glucose < 2) {
-      const impact = -4;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'GLUCOSE STARVATION',
-        impact: impact,
-        description: `Glucose: ${Math.round(this.moleculeStocks.glucose)} - Cell needs glucose for energy!`
-      });
-      
-      // Critical warning log
-      if (this.moleculeStocks.glucose < 1) {
-        console.warn('🚨 CRITICAL: Glucose starvation!', {
-          glucose: this.moleculeStocks.glucose,
-          health: this.cellHealth,
-          glucoseUptakeActive: this.cellularProcesses.find(p => p.id === 'glucose_uptake')?.active
-        });
-      }
-    }
-
-    if (this.moleculeStocks.oxygen < 3) {
-      const impact = -3;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'OXYGEN STARVATION',
-        impact: impact,
-        description: `Oxygen: ${Math.round(this.moleculeStocks.oxygen)} - Cell needs oxygen for respiration!`
-      });
-      
-      // Critical warning log
-      if (this.moleculeStocks.oxygen < 1) {
-        console.warn('🚨 CRITICAL: Oxygen starvation!', {
-          oxygen: this.moleculeStocks.oxygen,
-          health: this.cellHealth,
-          oxygenTransportActive: this.cellularProcesses.find(p => p.id === 'oxygen_transport')?.active,
-          respirationActive: this.cellularProcesses.find(p => p.id === 'respiration')?.active
-        });
-      }
-    }
-
-    // CRITICAL: Toxic waste accumulation
-    if (this.moleculeStocks.waste > 20) {
-      const impact = -5;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'TOXIC WASTE',
-        impact: impact,
-        description: `Waste: ${Math.round(this.moleculeStocks.waste)} - Toxic levels of waste!`
-      });
-      
-      // Critical warning log
-      if (this.moleculeStocks.waste > 30) {
-        console.warn('🚨 CRITICAL: Toxic waste levels!', {
-          waste: this.moleculeStocks.waste,
-          health: this.cellHealth,
-          wasteRemovalActive: this.cellularProcesses.find(p => p.id === 'waste_removal')?.active
-        });
-      }
-    }
-
-    // Moderate penalties for suboptimal conditions
-    if (this.moleculeStocks.atp < 5) {
-      const impact = -1;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'Low ATP',
-        impact: impact,
-        description: `ATP: ${Math.round(this.moleculeStocks.atp)} - Low energy reserves`
-      });
-    }
-    
-    if (this.energyLevel < 20) {
-      const impact = -1;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'Low Energy',
-        impact: impact,
-        description: `Energy: ${Math.floor(this.energyLevel)}% - Running low on energy`
-      });
-    }
-
-    // Positive factors for good molecular conditions
-    if (this.moleculeStocks.glucose >= 15) {
-      const impact = 0.5;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'Abundant Glucose',
-        impact: impact,
-        description: `Glucose: ${this.moleculeStocks.glucose} - Good fuel reserves`
-      });
-    }
-    
-    if (this.moleculeStocks.atp >= 20) {
-      const impact = 0.8;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'High ATP',
-        impact: impact,
-        description: `ATP: ${this.moleculeStocks.atp} - Excellent energy reserves`
-      });
-    }
-    
-    if (this.energyLevel > 70) {
-      const impact = 0.5;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'High Energy',
-        impact: impact,
-        description: `Energy: ${Math.floor(this.energyLevel)}% - Cell is energized`
-      });
-    }
-    
-    // Bonus for having multiple active processes (metabolic activity)
-    const activeProcesses = this.cellularProcesses.filter(p => p.active).length;
-    if (activeProcesses >= 3) {
-      const impact = 0.3;
-      healthChange += impact;
-      this.healthFactors.push({
-        factor: 'Active Metabolism',
-        impact: impact,
-        description: `${activeProcesses} processes active - healthy metabolism`
-      });
-    }
-    
-    this.cellHealth = Math.max(0, Math.min(100, this.cellHealth + healthChange));
-    
-    // Log critical health warnings
-    if (this.cellHealth <= 10 && this.cellHealth > 0) {
-      console.warn('🚨 CRITICAL: Cell health critically low!', {
-        health: this.cellHealth,
-        healthChange: healthChange,
-        criticalFactors: this.healthFactors.filter(f => f.impact < -2),
-        day: this.day,
-        energyLevel: this.energyLevel,
-        waste: this.moleculeStocks.waste,
-        co2: this.moleculeStocks.co2
-      });
-    }
-    
-    // Update health monitor display
-    this.updateHealthMonitor();
   }
 
   private checkRandomEvents(): void {
@@ -3211,8 +3094,9 @@ export class CellManagementGame extends Phaser.Scene {
       wordWrap: { width: 700 }
     }).setOrigin(0.5);
     
-    // Show survival time
-    this.add.text(width / 2, height / 2 - 80, `Survived: ${this.day} days, ${Math.floor(this.timeOfDay)} hours`, {
+    // Show survival time - adjust for starting on Day 1
+    const completeDays = this.day - 1;
+    this.add.text(width / 2, height / 2 - 80, `Survived: ${completeDays} days, ${Math.floor(this.timeOfDay)} hours`, {
       fontSize: '20px',
       color: '#95a5a6',
       align: 'center'
@@ -3337,8 +3221,7 @@ export class CellManagementGame extends Phaser.Scene {
     this.gameSpeed = 1.0;
     this.isPaused = false;
     
-    // Reset achievements and goals
-    this.achievements = [];
+    // Reset goals
     this.goals = [];
     this.activeEvents = [];
     this.healthFactors = [];
@@ -3382,7 +3265,8 @@ export class CellManagementGame extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
     
-    this.add.text(width / 2, height / 2 - 60, `Survived ${this.day} days!`, {
+    const completeDays = this.day - 1;
+    this.add.text(width / 2, height / 2 - 60, `Survived ${completeDays} days!`, {
       fontSize: '24px',
       color: '#27ae60',
       align: 'center'
@@ -3559,82 +3443,5 @@ export class CellManagementGame extends Phaser.Scene {
 
   update(): void {
     // Main update loop handled by timer events
-  }
-
-  private initializeGoals(): void {
-    this.goals = [
-      {
-        name: 'Survive Day 1',
-        description: 'Keep the cell alive for 24 hours',
-        target: 1,
-        current: 0,
-        completed: false
-      },
-      {
-        name: 'Energy Master',
-        description: 'Maintain energy above 80% for 5 minutes',
-        target: 300, // 5 minutes * 60 updates
-        current: 0,
-        completed: false
-      },
-      {
-        name: 'Waste Manager',
-        description: 'Keep waste below 10 for an entire day',
-        target: 1,
-        current: 0,
-        completed: false
-      },
-      {
-        name: 'ATP Producer',
-        description: 'Accumulate 500 total ATP',
-        target: 500,
-        current: 0,
-        completed: false
-      },
-      {
-        name: 'Toxicity Fighter',
-        description: 'Reduce toxicity from 50% to 0%',
-        target: 1,
-        current: 0,
-        completed: false
-      }
-    ];
-  }
-
-  private updateGoals(): void {
-    this.goals.forEach(goal => {
-      if (goal.completed) return;
-      
-      switch (goal.name) {
-        case 'Survive Day 1':
-          goal.current = this.day;
-          break;
-        case 'Energy Master':
-          if (this.energyLevel > 80) {
-            goal.current++;
-          } else {
-            goal.current = 0; // Reset if energy drops
-          }
-          break;
-        case 'Waste Manager':
-          if (this.moleculeStocks.waste < 10) {
-            // Track progress through day
-            goal.current = Math.min(goal.target, this.timeOfDay / 24);
-          } else {
-            goal.current = 0; // Reset if waste gets too high
-          }
-          break;
-        case 'ATP Producer':
-          goal.current = Math.max(goal.current, this.moleculeStocks.atp);
-          break;
-      }
-      
-      if (goal.current >= goal.target && !goal.completed) {
-        goal.completed = true;
-        this.achievements.push(goal.name);
-        this.showAlert(`Achievement Unlocked: ${goal.name}!`, 'info');
-        this.cellHealth = Math.min(100, this.cellHealth + 10); // Reward
-      }
-    });
   }
 }
